@@ -46,11 +46,18 @@ public class TwoFourTree
             throw new InvalidKeyException("Data is not comparable.");
         }
         Object result = searchElement(key, treeRoot);
-        if (result == null) {
+        TFNode resultNode = (TFNode) result;
+        int ind = FFGTE(key, resultNode);
+        if (treeComp.isEqual((resultNode.getItem(ind)).key(), key)) {
+            return resultNode;
+        }else{
+            throw new ElementNotFoundException("Element not found.");
+        }
+        /*if (result == null) {
             throw new ElementNotFoundException("Element not found.");
         } else {
             return result;
-        }
+        }*/
     }
 
     /**
@@ -61,33 +68,64 @@ public class TwoFourTree
      */
     @Override
     public void insertElement(Object key, Object element) {
-        TFNode node = new TFNode();
+        size++;
+        TFNode node;
+        if(treeRoot == null){
+           treeRoot = new TFNode();
+           node = treeRoot;
+        }else{
+            node = (TFNode) searchElement(key,treeRoot);
+        }
         //TODO: Search
+        Item myItem = new Item(key,element);
         //TODO: Add
-        //TODO: Deal with overflow (DONE!)
         
+        //If node has at least one item in it, use FFGTE to find insert location
+        //Otherwise, insert into location 0
+        int insertLocation = 0;
+        if(node.getNumItems() != 0){
+            insertLocation = FFGTE(key, node);
+        }
+        node.insertItem(insertLocation, myItem);
+        //TODO: Deal with overflow (DONE!)
+
         //Check for and resolve overflow
-        while(node != null && node.getItem(3) != null){
-            Item overflowItem = node.getItem(2);
+        while (node.getNumItems() == 4) {
+            Item pushItem = node.getItem(2);
             TFNode parent = node.getParent();
-            if(parent != null){
-                //Add item 2 to parent's last position
-                parent.addItem(parent.getNumItems(), overflowItem);
-                //Create new node and attach it to parent's last child spot
-                TFNode newNode = new TFNode();
-                newNode.addItem(0, node.getItem(3));
-                parent.setChild(parent.getNumItems(), newNode);
-                //
-                //TODO: Is this actually going to the correct child position?
-                //Should it be NumItems or NumItems + 1?
-                //
-            }else{
-                //
-                //TODO:
-                //This is the case where we have overflow on the root.
-                //DO we simply start another tree and then make a new root to join both?
-                //
+            if (parent == null) {
+                parent = new TFNode();
+                parent.setChild(0, node);
             }
+            int ind = FFGTE(pushItem.key(), parent);
+            parent.insertItem(ind, pushItem);
+
+            //Create new node and attach it to parent's last child spot
+            TFNode newNode = new TFNode();
+            newNode.addItem(0, node.getItem(3));
+            parent.setChild(ind + 1, newNode);
+            TFNode child3 = node.getChild(3);
+            TFNode child4 = node.getChild(4);
+            newNode.setChild(0, child3);
+            newNode.setChild(1, child4);
+            if(child3!=null){
+                child3.setParent(newNode);
+                child4.setParent(newNode);
+            }
+            
+
+            //Fix remains
+            node.setChild(4, null);
+            node.setChild(3, null);
+            node.deleteItem(3);
+            node.deleteItem(2);
+            
+            node.setParent(parent);
+            newNode.setParent(parent);
+            if(parent.getParent()==null){
+                treeRoot = parent;
+            }
+
             node = parent;
         }
     }
@@ -116,13 +154,13 @@ public class TwoFourTree
         myTree.insertElement(myInt2, myInt2);
         Integer myInt3 = new Integer(22);
         myTree.insertElement(myInt3, myInt3);
-
+        
         Integer myInt4 = new Integer(16);
         myTree.insertElement(myInt4, myInt4);
 
         Integer myInt5 = new Integer(49);
         myTree.insertElement(myInt5, myInt5);
-
+        
         Integer myInt6 = new Integer(100);
         myTree.insertElement(myInt6, myInt6);
 
@@ -131,7 +169,7 @@ public class TwoFourTree
 
         Integer myInt8 = new Integer(3);
         myTree.insertElement(myInt8, myInt8);
-
+        
         Integer myInt9 = new Integer(53);
         myTree.insertElement(myInt9, myInt9);
 
@@ -167,7 +205,7 @@ public class TwoFourTree
 
         myTree.printAllElements();
         System.out.println("done");
-
+        /*
         myTree = new TwoFourTree(myComp);
         final int TEST_SIZE = 10000;
 
@@ -186,6 +224,7 @@ public class TwoFourTree
                 myTree.printAllElements();
             }
         }
+*/
         System.out.println("done");
     }
 
@@ -281,15 +320,27 @@ public class TwoFourTree
 
     private Object searchElement(Object key, TFNode node) {
         if (node != null) {
+            //Get the FFGTE of the current key
             int location = FFGTE(key, node);
-            if (node.getItem(location) != null) {
+            if (location < node.getNumItems()) {
                 Item nodesItem = node.getItem(location);
+
+                //If item was found, returns the correct TFNode in Object form
                 if (treeComp.isEqual(nodesItem.key(), key)) {
                     return node;
+
+                    //If item wasn't found, search its child
                 } else {
+                    if(node.getChild(location) == null){
+                        return node;
+                    }
                     return searchElement(key, node.getChild(location));
                 }
+                //If we hit the end of the array, search the last child
             } else {
+                if(node.getChild(location)==null){
+                    return node;
+                }
                 return searchElement(key, node.getChild(node.getNumItems()));
             }
         } else {
