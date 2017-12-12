@@ -61,7 +61,35 @@ public class TwoFourTree
      */
     @Override
     public void insertElement(Object key, Object element) {
-        //needs written
+        TFNode node = new TFNode();
+        //TODO: Search
+        //TODO: Add
+        //TODO: Deal with overflow (DONE!)
+        
+        //Check for and resolve overflow
+        while(node != null && node.getItem(3) != null){
+            Item overflowItem = node.getItem(2);
+            TFNode parent = node.getParent();
+            if(parent != null){
+                //Add item 2 to parent's last position
+                parent.addItem(parent.getNumItems(), overflowItem);
+                //Create new node and attach it to parent's last child spot
+                TFNode newNode = new TFNode();
+                newNode.addItem(0, node.getItem(3));
+                parent.setChild(parent.getNumItems(), newNode);
+                //
+                //TODO: Is this actually going to the correct child position?
+                //Should it be NumItems or NumItems + 1?
+                //
+            }else{
+                //
+                //TODO:
+                //This is the case where we have overflow on the root.
+                //DO we simply start another tree and then make a new root to join both?
+                //
+            }
+            node = parent;
+        }
     }
 
     /**
