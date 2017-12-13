@@ -1,11 +1,16 @@
 package termproject;
 
 /**
- * Title: Term Project 2-4 Trees Description: Copyright: Copyright (c) 2001
- * Company:
+ * Title: Term Project 2-4 Trees Description: This project is designed to build
+ * a 2-4 tree data structure.
  *
- * @authors Dan and Don
- * @version 1.0
+ * @author Daniel Garcia
+ * @author Donald Shade
+ * @version 1.0 File: TwoFourTree.java Created: NOV 2017 Summary of
+ * Modifications: Previous - D.G - created class and main 09 DEC 2017 – D&D –
+ * added overided functions and implemented find with a search and FFGTE 11 DEC
+ * 2017 - D&D - implemented the insert function debugged and works. Description:
+ * This class instantiates a 2-4 tree.
  */
 public class TwoFourTree
         implements Dictionary {
@@ -49,15 +54,10 @@ public class TwoFourTree
         TFNode resultNode = (TFNode) result;
         int ind = FFGTE(key, resultNode);
         if (treeComp.isEqual((resultNode.getItem(ind)).key(), key)) {
-            return resultNode;
-        }else{
+            return resultNode.getItem(ind);
+        } else {
             throw new ElementNotFoundException("Element not found.");
         }
-        /*if (result == null) {
-            throw new ElementNotFoundException("Element not found.");
-        } else {
-            return result;
-        }*/
     }
 
     /**
@@ -70,24 +70,23 @@ public class TwoFourTree
     public void insertElement(Object key, Object element) {
         size++;
         TFNode node;
-        if(treeRoot == null){
-           treeRoot = new TFNode();
-           node = treeRoot;
-        }else{
-            node = (TFNode) searchElement(key,treeRoot);
+        if (treeRoot == null) {
+            treeRoot = new TFNode();
+            node = treeRoot;
+        } else {
+            node = (TFNode) searchElement(key, treeRoot);
         }
         //TODO: Search
-        Item myItem = new Item(key,element);
+        Item myItem = new Item(key, element);
         //TODO: Add
-        
+
         //If node has at least one item in it, use FFGTE to find insert location
         //Otherwise, insert into location 0
         int insertLocation = 0;
-        if(node.getNumItems() != 0){
+        if (node.getNumItems() != 0) {
             insertLocation = FFGTE(key, node);
         }
         node.insertItem(insertLocation, myItem);
-        //TODO: Deal with overflow (DONE!)
 
         //Check for and resolve overflow
         while (node.getNumItems() == 4) {
@@ -95,6 +94,7 @@ public class TwoFourTree
             TFNode parent = node.getParent();
             if (parent == null) {
                 parent = new TFNode();
+                setRoot(parent);
                 parent.setChild(0, node);
             }
             int ind = FFGTE(pushItem.key(), parent);
@@ -108,23 +108,19 @@ public class TwoFourTree
             TFNode child4 = node.getChild(4);
             newNode.setChild(0, child3);
             newNode.setChild(1, child4);
-            if(child3!=null){
+            if (child3 != null) {
                 child3.setParent(newNode);
                 child4.setParent(newNode);
             }
-            
 
             //Fix remains
             node.setChild(4, null);
             node.setChild(3, null);
             node.deleteItem(3);
             node.deleteItem(2);
-            
+
             node.setParent(parent);
             newNode.setParent(parent);
-            if(parent.getParent()==null){
-                treeRoot = parent;
-            }
 
             node = parent;
         }
@@ -140,14 +136,44 @@ public class TwoFourTree
      */
     @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
-        //needs written
-        return null;
+        if (!treeComp.isComparable(key)) {
+            throw new InvalidKeyException("Data is not comparable.");
+        }
+        Object result = searchElement(key, treeRoot);
+        TFNode node = (TFNode) result;
+        int ind = FFGTE(key, node);
+        if (treeComp.isEqual((node.getItem(ind)).key(), key)) {
+            Item myItem = node.getItem(ind);
+
+            TFNode inOrder = node.getChild(ind + 1);
+            if (inOrder == null) {
+                node.removeItem(ind);
+                if (node.getNumItems() == 0) {
+                    fixUnderflow(node);
+                }
+            } else {
+                while (inOrder.getChild(0) != null) {
+                    inOrder = inOrder.getChild(0);
+                }
+                node.addItem(ind, inOrder.removeItem(0));
+                if (inOrder.getNumItems() == 0) {
+                    fixUnderflow(inOrder);
+                }
+            }
+
+            size--;
+            return myItem.key();
+
+        } else {
+            throw new ElementNotFoundException("Element not found.");
+        }
+
     }
 
     public static void main(String[] args) {
         Comparator myComp = new IntegerComparator();
         TwoFourTree myTree = new TwoFourTree(myComp);
-
+        /*
         Integer myInt1 = new Integer(47);
         myTree.insertElement(myInt1, myInt1);
         Integer myInt2 = new Integer(83);
@@ -202,21 +228,31 @@ public class TwoFourTree
 
         Integer myInt19 = new Integer(51);
         myTree.insertElement(myInt19, myInt19);
-
         myTree.printAllElements();
+        
         System.out.println("done");
-        /*
+         */
         myTree = new TwoFourTree(myComp);
-        final int TEST_SIZE = 10000;
+        final int TEST_SIZE = 50;
 
         for (int i = 0; i < TEST_SIZE; i++) {
             myTree.insertElement(new Integer(i), new Integer(i));
-            //          myTree.printAllElements();
-            //         myTree.checkTree();
+            //myTree.printAllElements();
+            myTree.checkTree();
         }
+        myTree.printAllElements();
         System.out.println("removing");
         for (int i = 0; i < TEST_SIZE; i++) {
+            /*if(i == 4){
+                myTree.printAllElements();
+            }*/
             int out = (Integer) myTree.removeElement(new Integer(i));
+            myTree.checkTree();
+            System.out.println(out);
+            //if (i == 2) {
+                myTree.printAllElements();
+            //}
+
             if (out != i) {
                 throw new TwoFourTreeException("main: wrong element removed");
             }
@@ -224,7 +260,6 @@ public class TwoFourTree
                 myTree.printAllElements();
             }
         }
-*/
         System.out.println("done");
     }
 
@@ -331,14 +366,14 @@ public class TwoFourTree
 
                     //If item wasn't found, search its child
                 } else {
-                    if(node.getChild(location) == null){
+                    if (node.getChild(location) == null) {
                         return node;
                     }
                     return searchElement(key, node.getChild(location));
                 }
                 //If we hit the end of the array, search the last child
             } else {
-                if(node.getChild(location)==null){
+                if (node.getChild(location) == null) {
                     return node;
                 }
                 return searchElement(key, node.getChild(node.getNumItems()));
@@ -357,10 +392,90 @@ public class TwoFourTree
             }
         }
         return node.getNumItems();
-        //walk each node (it's an array)
-        //if(node[i].key >= key){
-        //check node[i-1] `s children
-        //otherwise check node[i] `s children
-        //repeat (?)
+    }
+
+    private void fixUnderflow(TFNode node) {
+        if(node == treeRoot){
+            treeRoot = node.getChild(0);
+            return;
+        }
+        TFNode parent = node.getParent();
+        int myNumber = WCIT(node);
+        TFNode leftSib = null;
+        TFNode rightSib = null;
+        if (myNumber > 0) {
+            leftSib = parent.getChild(myNumber - 1);
+        }
+        if (myNumber < 2) {
+            rightSib = parent.getChild(myNumber + 1);
+        }
+
+        //LXFER
+        if (canLeftXfer(myNumber, leftSib)) {
+                node.insertItem(node.getNumItems(), parent.deleteItem(myNumber));
+                node.setChild(0, leftSib.getChild(leftSib.getNumItems()));
+                if (node.getChild(0) != null) {
+                    node.getChild(0).setParent(node);;
+                }
+                parent.addItem(myNumber, leftSib.removeItem(leftSib.getNumItems()));
+        } //RXFER
+        else if (canRightXfer(myNumber, rightSib)) {
+                node.addItem(0, parent.deleteItem(myNumber));
+                node.setChild(1, rightSib.getChild(0));
+                if (node.getChild(1) != null) {
+                    node.getChild(1).setParent(node);
+                }
+                parent.addItem(myNumber, rightSib.removeItem(0));
+        } //LFUSION
+        else if (leftSib != null) {
+            leftSib.insertItem(leftSib.getNumItems(), parent.removeItem(myNumber));
+            leftSib.setChild(leftSib.getNumItems(), node.getChild(0));
+            if (node.getChild(leftSib.getNumItems()) != null) {
+                leftSib.getChild(leftSib.getNumItems()).setParent(rightSib);
+            }
+            
+            if(parent.getNumItems() == 0){
+                fixUnderflow(parent);
+            }
+        } //RFUSION
+        else if (rightSib != null) {
+            rightSib.insertItem(0, parent.removeItem(myNumber));
+            rightSib.setChild(0, node.getChild(0));
+            if (node.getChild(0) != null) {
+                rightSib.getChild(0).setParent(rightSib);
+            }
+            
+            if (parent.getNumItems() == 0) {
+                fixUnderflow(parent);
+            }
+        }
+    }
+
+    private int WCIT(TFNode node) {
+        TFNode parent = node.getParent();
+        for (int i = 0; i < 3; i++) {
+            if (parent.getChild(i) == node) {
+                return i;
+            }
+        }
+        throw new TwoFourTreeException();
+    }
+
+    private boolean canLeftXfer(int myNumber, TFNode sib) {
+        if (myNumber >= 1 && sib != null) {
+            if (sib.getNumItems() > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean canRightXfer(int myNumber, TFNode sib) {
+        if (myNumber <= 2 && sib != null) {
+            if (sib.getNumItems() > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }
