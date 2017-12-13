@@ -7,9 +7,12 @@ package termproject;
  * @author Daniel Garcia
  * @author Donald Shade
  * @version 1.0 File: TwoFourTree.java Created: NOV 2017 Summary of
- * Modifications: Previous - D.G - created class and main 09 DEC 2017 – D&D –
- * added overided functions and implemented find with a search and FFGTE 11 DEC
- * 2017 - D&D - implemented the insert function debugged and works. Description:
+ * Modifications: 
+ * Previous - D.G - created class and main 
+ * 09 DEC 2017 – D&D –added overrided functions and implemented find with a search and FFGTE 
+ * 11 DEC 2017 - D&D - implemented the insert function, debugged and works. 
+ * 13 DEC 2017 - D&D - implemented the remove function, debugged and works.
+ * Description:
  * This class instantiates a 2-4 tree.
  */
 public class TwoFourTree
