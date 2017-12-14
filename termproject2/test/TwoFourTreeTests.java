@@ -15,10 +15,6 @@ import termproject.IntegerComparator;
 import termproject.TwoFourTree;
 import termproject.TwoFourTreeException;
 
-/**
- *
- * @author donaldrshade
- */
 public class TwoFourTreeTests {
 
     @Test
@@ -26,33 +22,34 @@ public class TwoFourTreeTests {
         System.out.println("testDuplicates");
         Comparator myComp = new IntegerComparator();
         TwoFourTree myTree = new TwoFourTree(myComp);
-        final int TEST_SIZE = 10;
-        for (int i = 0; i < TEST_SIZE; i++) {
-            myTree.insertElement(new Integer(i), new Integer(i));
-            myTree.checkTree();
+        final int TEST_SIZE = 30;
+        final int NUM_OF_DUPS = 2;
+        for (int i = 0; i < NUM_OF_DUPS; i++) {
+            for (int j = 0; j < TEST_SIZE; j++) {
+                myTree.insertElement(new Integer(j), new Integer(j));
+                
+                myTree.checkTree();
+            }
         }
-        for (int i = 0; i < TEST_SIZE; i++) {
-            myTree.insertElement(new Integer(i), new Integer(i));
-            myTree.checkTree();
-        }
+
         myTree.printAllElements();
         for (int i = 0; i < TEST_SIZE; i++) {
-            int out = (Integer) myTree.removeElement(new Integer(i));
-            if (out != i) {
-                fail();
+            for (int j = 0; j < NUM_OF_DUPS; j++) {
+                System.out.println("removing " + i);
+                int out = (Integer) myTree.removeElement(new Integer(i));
+                if (out != i) {
+                    System.out.print("Error in removal!");
+                } else {
+                    System.out.println(out);
+                }
+                myTree.printAllElements();
+                myTree.checkTree();
             }
-            myTree.checkTree();
-        }
-        for (int i = 0; i < TEST_SIZE; i++) {
-            int out = (Integer) myTree.removeElement(new Integer(i));
-            if (out != i) {
-                fail();
-            }
-            myTree.checkTree();
+
         }
     }
 
-    /*@Test
+    @Test
     public void testManyNumbers() {
         System.out.println("testManyNumbers");
         Comparator myComp = new IntegerComparator();
@@ -69,39 +66,39 @@ public class TwoFourTreeTests {
             }
             myTree.checkTree();
         }
-    }*/
+    }
 
-//    @Test
-//    public void testManyNumbersWithDuplicates() {
-//        System.out.println("testManyNumbersWithDuplicates");
-//        Comparator myComp = new IntegerComparator();
-//        TwoFourTree myTree = new TwoFourTree(myComp);
-//        final int TEST_SIZE = 50;
-//        for (int i = 0; i < TEST_SIZE; i++) {
-//            myTree.insertElement(new Integer(i), new Integer(i));
-//            myTree.checkTree();
-//        }
-//        for (int i = 0; i < TEST_SIZE; i++) {
-//            myTree.insertElement(new Integer(i), new Integer(i));
-//            myTree.checkTree();
-//        }
-//        for (int i = 0; i < TEST_SIZE; i++) {
-//            int out = (Integer) myTree.removeElement(new Integer(i));
-//            if (out != i) {
-//                fail();
-//            }
-//            myTree.checkTree();
-//        }
-//        for (int i = 0; i < TEST_SIZE; i++) {
-//            int out = (Integer) myTree.removeElement(new Integer(i));
-//            if (out != i) {
-//                fail();
-//            }
-//            myTree.checkTree();
-//        }
-//    }
+    @Test
+    public void testManyNumbersWithDuplicates() {
+        System.out.println("testManyNumbersWithDuplicates");
+        Comparator myComp = new IntegerComparator();
+        TwoFourTree myTree = new TwoFourTree(myComp);
+        final int TEST_SIZE = 50;
+        for (int i = 0; i < TEST_SIZE; i++) {
+            myTree.insertElement(new Integer(i), new Integer(i));
+            myTree.checkTree();
+        }
+        for (int i = 0; i < TEST_SIZE; i++) {
+            myTree.insertElement(new Integer(i), new Integer(i));
+            myTree.checkTree();
+        }
+        for (int i = 0; i < TEST_SIZE; i++) {
+            int out = (Integer) myTree.removeElement(new Integer(i));
+            if (out != i) {
+                fail();
+            }
+            myTree.checkTree();
+        }
+        for (int i = 0; i < TEST_SIZE; i++) {
+            int out = (Integer) myTree.removeElement(new Integer(i));
+            if (out != i) {
+                fail();
+            }
+            myTree.checkTree();
+        }
+    }
 
-    /*@Test
+    @Test
     public void testInsertFewNumbersWithDuplicates() {
         System.out.println("testInsertFewNumbersWithDuplicates");
         Comparator myComp = new IntegerComparator();
@@ -163,5 +160,5 @@ public class TwoFourTreeTests {
         myTree.insertElement(myInt19, myInt19);
         //myTree.printAllElements();
         myTree.checkTree();
-    }*/
+    }
 }
